@@ -24,11 +24,11 @@ func main() {
 	slog.Info("Generating random events")
 
 	for {
-		eventByte, err := randomEvent.GenerateRandomEvent()
+		agentName := GetMeRandomValue(AGENT)
+		eventByte, err := randomEvent.GenerateRandomEvent(agentName)
 		if err != nil {
 			slog.Panic(err)
 		}
-		agentName := GetMeRandomValue(AGENT)
 		err = producer.PublishEvent(eventByte, agentName)
 		if err != nil {
 			slog.Panic(err)

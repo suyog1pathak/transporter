@@ -9,6 +9,7 @@ require (
 	github.com/gookit/goutil v0.6.8 // indirect
 	github.com/gookit/gsr v0.0.8 // indirect
 	github.com/gookit/slog v0.5.1 // indirect
+	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/graph-gophers/graphql-go v1.5.0 // indirect
 	github.com/lucasepe/codename v0.2.0 // indirect
 	github.com/memphisdev/memphis.go v1.0.1 // indirect

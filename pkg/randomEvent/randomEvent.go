@@ -18,7 +18,7 @@ func generateName() (string, error) {
 	return name, nil
 }
 
-func GenerateRandomEvent() ([]byte, error) {
+func GenerateRandomEvent(agentName string) ([]byte, error) {
 
 	eventName, err := generateName()
 	if err != nil {
@@ -26,7 +26,8 @@ func GenerateRandomEvent() ([]byte, error) {
 	}
 
 	event := model.Event{
-		Name: eventName,
+		AgentName: agentName,
+		Name:      eventName,
 		Metadata: map[string]string{
 			"managed_by": "transporter",
 		},
