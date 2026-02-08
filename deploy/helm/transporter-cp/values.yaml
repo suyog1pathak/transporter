@@ -1,0 +1,102 @@
+# Transporter Control Plane Configuration
+
+# Image configuration
+image:
+  repository: localhost/transporter
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+# Service configuration
+service:
+  type: ClusterIP
+  websocketPort: 8080
+  annotations: {}
+
+# Resource limits
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Replica count
+replicaCount: 1
+
+# Control Plane configuration
+cp:
+  wsAddr: "0.0.0.0"
+  wsPort: 8080
+
+  # Memphis configuration (disabled for testing)
+  memphis:
+    host: "memphis"  # Just hostname, Memphis client adds port
+    username: "root"
+    password: "memphis"
+    station: "transporter-events"
+    accountID: 1
+    enabled: false  # Disable Memphis for now
+
+  # Redis configuration
+  redis:
+    addr: "transporter-cp-redis-master:6379"
+    password: ""
+    db: 0
+
+  # Health & Timeouts
+  heartbeatTimeout: "30s"
+  eventRetryMax: 3
+
+# Debug mode
+debug: false
+
+# Service Account
+serviceAccount:
+  create: true
+  name: transporter-cp
+
+# Pod annotations
+podAnnotations: {}
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {}
+
+# Redis dependency configuration
+redis:
+  enabled: true
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: false
+  replica:
+    replicaCount: 0
+
+# Memphis dependency configuration
+memphis:
+  enabled: true
+  cluster:
+    enabled: false
+
+  # Memphis configuration
+  metadata:
+    postgresql:
+      username: postgres
+      # For production, use a secret
+      password: postgres
+
+  # Resource limits for Memphis
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi

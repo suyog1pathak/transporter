@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: transporter-test
+  labels:
+    app: transporter
+    created-by: event-producer

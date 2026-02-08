@@ -1,0 +1,23 @@
+# Sample Kubernetes Event
+# This event will create a namespace on the target agent
+
+id: "sample-event-001"
+type: "k8s_resource"
+target_agent: "kind-agent-1"
+created_by: "user@example.com"
+ttl: "24h"
+priority: 0
+labels:
+  environment: "test"
+  component: "namespace-creation"
+
+payload:
+  manifests:
+    - |
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: sample-namespace
+        labels:
+          created-by: transporter
+          environment: test
