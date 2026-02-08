@@ -19,3 +19,19 @@
 
 # Go workspace file
 go.work
+
+# Binaries
+bin/
+
+# Development/session files
+.claude/
+CONTEXT.md
+DEPLOYMENT.md
+RESUME.md
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store

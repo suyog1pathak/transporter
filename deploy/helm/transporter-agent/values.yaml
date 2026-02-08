@@ -1,0 +1,96 @@
+# Transporter Agent Configuration
+
+# Image configuration
+image:
+  repository: localhost/transporter
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+# Resource limits
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+# Replica count (usually 1 per cluster)
+replicaCount: 1
+
+# Agent configuration
+agent:
+  # REQUIRED: Unique agent ID
+  agentID: "kind-agent-1"
+
+  # REQUIRED: Cluster name
+  clusterName: "kind-cluster"
+
+  # Agent name (defaults to agentID if not set)
+  agentName: ""
+
+  # Cluster provider (eks, gke, aks, kind)
+  clusterProvider: "kind"
+
+  # Region
+  region: "local"
+
+  # Namespace where agent is running
+  namespace: "default"
+
+  # Control Plane WebSocket URL
+  cpURL: "ws://transporter-cp:8080/ws"
+
+  # Kubernetes config
+  inCluster: true
+  kubeconfigPath: ""
+
+  # Heartbeat interval
+  heartbeatInterval: "10s"
+
+# Debug mode
+debug: false
+
+# Service Account with RBAC
+serviceAccount:
+  create: true
+  name: transporter-agent
+  # Annotations for the service account
+  annotations: {}
+
+# RBAC configuration
+rbac:
+  create: true
+  # Rules for the agent to manage K8s resources
+  # By default, agent can manage all resources in all namespaces
+  # Customize based on your security requirements
+  rules:
+    - apiGroups: ["*"]
+      resources: ["*"]
+      verbs: ["*"]
+
+# Pod annotations
+podAnnotations: {}
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {}
+
+# Pod security context
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+# Container security context
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true

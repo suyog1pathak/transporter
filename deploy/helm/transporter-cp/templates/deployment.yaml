@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "transporter-cp.fullname" . }}
+  labels:
+    {{- include "transporter-cp.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "transporter-cp.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "transporter-cp.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "transporter-cp.serviceAccountName" . }}
+      containers:
+      - name: transporter-cp
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["/app/transporter"]
+        args:
+          - "cp"
+          - "--ws-addr={{ .Values.cp.wsAddr }}"
+          - "--ws-port={{ .Values.cp.wsPort }}"
+          {{- if .Values.cp.memphis.enabled }}
+          - "--memphis-enabled=true"
+          - "--memphis-host={{ .Values.cp.memphis.host }}"
+          - "--memphis-username={{ .Values.cp.memphis.username }}"
+          - "--memphis-password={{ .Values.cp.memphis.password }}"
+          - "--memphis-station={{ .Values.cp.memphis.station }}"
+          - "--memphis-account-id={{ .Values.cp.memphis.accountID }}"
+          {{- else }}
+          - "--memphis-enabled=false"
+          {{- end }}
+          - "--redis-addr={{ .Values.cp.redis.addr }}"
+          {{- if .Values.cp.redis.password }}
+          - "--redis-password={{ .Values.cp.redis.password }}"
+          {{- end }}
+          - "--redis-db={{ .Values.cp.redis.db }}"
+          - "--heartbeat-timeout={{ .Values.cp.heartbeatTimeout }}"
+          - "--event-retry-max={{ .Values.cp.eventRetryMax }}"
+          {{- if .Values.debug }}
+          - "--debug"
+          {{- end }}
+        ports:
+        - name: websocket
+          containerPort: {{ .Values.cp.wsPort }}
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: websocket
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: websocket
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

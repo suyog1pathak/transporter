@@ -1,0 +1,16 @@
+apiVersion: v2
+name: transporter-agent
+description: Transporter Data Plane Agent - Executes events from Control Plane
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - kubernetes
+  - multi-cluster
+  - event-driven
+  - agent
+home: https://github.com/suyog1pathak/transporter
+sources:
+  - https://github.com/suyog1pathak/transporter
+maintainers:
+  - name: Suyog Pathak

@@ -1,0 +1,27 @@
+apiVersion: v2
+name: transporter-cp
+description: Transporter Control Plane - Event-driven multi-cluster Kubernetes management
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - kubernetes
+  - multi-cluster
+  - event-driven
+  - platform-engineering
+home: https://github.com/suyog1pathak/transporter
+sources:
+  - https://github.com/suyog1pathak/transporter
+maintainers:
+  - name: Suyog Pathak
+dependencies:
+  - name: redis
+    version: "~24.1.0"
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled
+  # Memphis dependency temporarily disabled - repo unavailable
+  # Will deploy Memphis separately or use alternative message queue
+  # - name: memphis
+  #   version: "~1.4.0"
+  #   repository: https://k8s.memphis.dev/charts/
+  #   condition: memphis.enabled
