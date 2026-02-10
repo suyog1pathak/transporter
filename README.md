@@ -246,12 +246,12 @@ For production-like testing, deploy Control Plane and Agents in separate kind cl
 │ cp-cluster (Control Plane Cluster)                      │
 ├─────────────────────────────────────────────────────────┤
 │ Pods:                                                   │
-│   ├── transporter-cp              [1/1 Running]        │
-│   └── transporter-cp-redis-master [1/1 Running]        │
-│                                                          │
+│   ├── transporter-cp              [1/1 Running]         │
+│   └── transporter-cp-redis-master [1/1 Running]         │
+│                                                         │
 │ Services:                                               │
-│   ├── transporter-cp               NodePort 8080:30080 │
-│   └── transporter-cp-redis-master  ClusterIP 6379      │
+│   ├── transporter-cp               NodePort 8080:30080  │
+│   └── transporter-cp-redis-master  ClusterIP 6379       │
 └────────────────────┬────────────────────────────────────┘
                      │
                      │ WebSocket: ws://172.18.0.2:30080/ws
@@ -261,12 +261,12 @@ For production-like testing, deploy Control Plane and Agents in separate kind cl
 │ agent-cluster (Data Plane Cluster)                      │
 ├─────────────────────────────────────────────────────────┤
 │ Pods:                                                   │
-│   └── transporter-agent           [1/1 Running]        │
-│                                                          │
+│   └── transporter-agent           [1/1 Running]         │
+│                                                         │
 │ Agent Details:                                          │
-│   ├── ID: agent-cluster-agent-1                        │
-│   ├── Connects to CP external endpoint (NodePort)      │
-│   └── Executes K8s operations in this cluster          │
+│   ├── ID: agent-cluster-agent-1                         │
+│   ├── Connects to CP external endpoint (NodePort)       │
+│   └── Executes K8s operations in this cluster           │
 └─────────────────────────────────────────────────────────┘
 ```
 
