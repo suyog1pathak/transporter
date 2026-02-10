@@ -21,43 +21,80 @@ Transporter is a lightweight, event-driven system that enables platform teams to
 
 ## Architecture
 
+### High-Level Overview
+
 ```
-┌─────────────────┐
-│ Event Producer  │ (HTTP POST /events or Memphis Queue)
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────────────────────────┐
-│       Control Plane (CP)            │
-│  ┌──────────────────────────────┐  │
-│  │ - Event Router               │  │
-│  │ - Agent Registry             │  │
-│  │ - WebSocket Server           │  │
-│  │ - HTTP /events endpoint      │  │
-│  └──────────┬───────────────────┘  │
-│             │                       │
-│       ┌─────▼─────┐                │
-│       │   Redis   │ (State)        │
-│       └───────────┘                │
-└────────┬────────────────────────────┘
-         │ WebSocket
-         │
-    ┌────┴──────────────────┐
-    │                       │
-┌───▼────────┐      ┌───────▼──────┐
-│ Agent (DP) │      │  Agent (DP)  │
-│  Cluster 1 │      │   Cluster 2  │
-└────┬───────┘      └───────┬──────┘
-     │                      │
-     ▼                      ▼
- K8s API               K8s API
+                    Event Producers
+                         │
+            ┌────────────┼────────────┐
+            │            │            │
+         HTTP API    Memphis      (Other)
+            │         Queue          │
+            │            │            │
+            └────────────┼────────────┘
+                         │
+                         ▼
+        ┌────────────────────────────────────────┐
+        │   Control Plane Cluster                │
+        │                                         │
+        │  ┌──────────────┐    ┌──────────────┐ │
+        │  │ Memphis*     │    │   Redis      │ │
+        │  │ (Optional)   │    │   (State)    │ │
+        │  └──────┬───────┘    └──────▲───────┘ │
+        │         │                   │          │
+        │  ┌──────▼───────────────────┴───────┐ │
+        │  │     Control Plane (CP)           │ │
+        │  │  - Event Router                  │ │
+        │  │  - Agent Registry                │ │
+        │  │  - WebSocket Server (0.0.0.0)    │ │
+        │  │  - HTTP /events endpoint         │ │
+        │  └──────────────┬───────────────────┘ │
+        └─────────────────┼──────────────────────┘
+                          │
+                          │ Outbound WebSocket Connections
+                          │ (Agents initiate connections)
+                          │
+         ┌────────────────┼────────────────┐
+         │                │                │
+         │                │                │
+    ┌────▼─────────┐ ┌────▼─────────┐ ┌──▼───────────┐
+    │   Cluster 1  │ │   Cluster 2  │ │  Cluster N   │
+    │              │ │              │ │              │
+    │ ┌──────────┐ │ │ ┌──────────┐ │ │ ┌──────────┐ │
+    │ │  Agent   │ │ │ │  Agent   │ │ │ │  Agent   │ │
+    │ │   (DP)   │ │ │ │   (DP)   │ │ │ │   (DP)   │ │
+    │ └────┬─────┘ │ │ └────┬─────┘ │ │ └────┬─────┘ │
+    │      │       │ │      │       │ │      │       │
+    │      ▼       │ │      ▼       │ │      ▼       │
+    │  K8s API    │ │  K8s API    │ │  K8s API    │
+    └──────────────┘ └──────────────┘ └──────────────┘
 ```
 
-**Control Plane (CP)**: Routes events to agents, manages connections, tracks state
-**Data Plane Agents (DP)**: Execute operations in target K8s clusters
-**Event Producer**: CLI tool to create and submit events (HTTP or Memphis mode)
-**Redis**: In-memory state store for events, agents, and audit logs
-**Memphis**: Optional message queue for production event distribution
+### Key Architectural Principles
+
+**1. Reverse Connection Model**
+- Agents connect TO Control Plane (not the other way)
+- Works in firewalled/air-gapped environments
+- No inbound access needed to agent clusters
+
+**2. Event Distribution Modes**
+- **HTTP Mode**: Direct event submission to CP (testing/dev)
+- **Memphis Mode**: Queue-based distribution (production)
+
+**3. Components**
+
+| Component | Purpose | Deployment |
+|-----------|---------|------------|
+| **Control Plane (CP)** | Routes events, manages agent connections | Dedicated cluster |
+| **Data Plane Agents** | Execute operations in target K8s clusters | Each managed cluster |
+| **Memphis** | Message queue for event distribution (optional) | CP cluster |
+| **Redis** | State store for events, agents, audit logs | CP cluster |
+| **Event Producer** | CLI tool to create/submit events | Anywhere with network access |
+
+**4. Communication Flow**
+```
+Event Created → CP Receives → CP Routes → Agent Executes → Status Reports Back
+```
 
 ## Use Cases
 
