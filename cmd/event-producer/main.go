@@ -23,11 +23,12 @@ var (
 	cpURL string // Control Plane WebSocket URL for direct mode
 
 	// Memphis connection
-	memphisHost     string
-	memphisUsername string
-	memphisPassword string
-	memphisStation  string
-	memphisAccountID int
+	memphisHost          string
+	memphisUsername      string
+	memphisPassword      string
+	memphisConnectionToken string
+	memphisStation       string
+	memphisAccountID     int
 
 	// Event metadata
 	targetAgent string
@@ -62,9 +63,10 @@ func init() {
 	// Memphis flags (for memphis mode)
 	rootCmd.PersistentFlags().StringVar(&memphisHost, "memphis-host", "localhost:6666", "Memphis server host:port")
 	rootCmd.PersistentFlags().StringVar(&memphisUsername, "memphis-username", "root", "Memphis username")
-	rootCmd.PersistentFlags().StringVar(&memphisPassword, "memphis-password", "memphis", "Memphis password")
+	rootCmd.PersistentFlags().StringVar(&memphisPassword, "memphis-password", "memphis", "Memphis password (alternative to connection token)")
+	rootCmd.PersistentFlags().StringVar(&memphisConnectionToken, "memphis-connection-token", "", "Memphis connection token (preferred over password)")
 	rootCmd.PersistentFlags().StringVar(&memphisStation, "memphis-station", "transporter-events", "Memphis station name")
-	rootCmd.PersistentFlags().IntVar(&memphisAccountID, "memphis-account-id", 1, "Memphis account ID")
+	rootCmd.PersistentFlags().IntVar(&memphisAccountID, "memphis-account-id", 0, "Memphis account ID (optional)")
 
 	// Event metadata
 	rootCmd.PersistentFlags().StringVar(&targetAgent, "agent", "", "Target agent ID (required)")
@@ -269,11 +271,12 @@ func publishViaMemphis(event *model.Event) error {
 	fmt.Printf("🔌 Connecting to Memphis at %s...\n", memphisHost)
 
 	memphisQueue, err := queue.NewMemphisQueue(queue.Config{
-		Host:        memphisHost,
-		Username:    memphisUsername,
-		Password:    memphisPassword,
-		StationName: memphisStation,
-		AccountID:   memphisAccountID,
+		Host:            memphisHost,
+		Username:        memphisUsername,
+		Password:        memphisPassword,
+		ConnectionToken: memphisConnectionToken,
+		StationName:     memphisStation,
+		AccountID:       memphisAccountID,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to connect to Memphis: %w", err)

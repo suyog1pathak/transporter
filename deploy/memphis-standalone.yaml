@@ -1,0 +1,87 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: memphis
+  namespace: transporter-system
+  labels:
+    app: memphis
+spec:
+  type: ClusterIP
+  ports:
+    - name: client
+      port: 6666
+      targetPort: 6666
+      protocol: TCP
+    - name: management
+      port: 5555
+      targetPort: 5555
+      protocol: TCP
+    - name: rest-gateway
+      port: 4444
+      targetPort: 4444
+      protocol: TCP
+    - name: ui
+      port: 9000
+      targetPort: 9000
+      protocol: TCP
+  selector:
+    app: memphis
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: memphis
+  namespace: transporter-system
+  labels:
+    app: memphis
+spec:
+  serviceName: memphis
+  replicas: 1
+  selector:
+    matchLabels:
+      app: memphis
+  template:
+    metadata:
+      labels:
+        app: memphis
+    spec:
+      containers:
+      - name: memphis
+        image: memphisos/memphis:1.4.4-stable
+        ports:
+        - name: client
+          containerPort: 6666
+        - name: management
+          containerPort: 5555
+        - name: rest-gateway
+          containerPort: 4444
+        - name: ui
+          containerPort: 9000
+        env:
+        - name: ROOT_PASSWORD
+          value: "memphis"
+        - name: CONNECTION_TOKEN
+          value: "memphis"
+        - name: DOCKER_ENV
+          value: "true"
+        - name: ANALYTICS
+          value: "false"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        volumeMounts:
+        - name: data
+          mountPath: /data
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi

@@ -70,27 +70,36 @@ Transporter is a lightweight, event-driven system that enables platform teams to
 
 🎉 **MVP Complete and Tested!** - All core functionality working end-to-end
 
-### Test Results (2026-02-08)
+### Test Results (2026-02-10)
 
-Successfully tested complete event flow on kind cluster:
+Successfully tested complete event flow in **multi-cluster setup**:
 
-✅ **Event sent** → CP received → Agent executed → **Namespace created in cluster!**
+✅ **Event sent** → CP (cp-cluster) → Agent (agent-cluster) → **Namespace created!**
 
 ```bash
-$ ./bin/event-producer k8s --agent kind-agent-1 --manifest namespace.yaml --mode http
-✅ Event accepted by Control Plane
+# Send event via HTTP to CP in cp-cluster
+$ curl -X POST http://localhost:30080/events -H "Content-Type: application/json" -d '{...}'
+{"event_id":"test-event-1770722316","message":"Event routed to agent","status":"accepted"}
 
-$ kubectl get namespace transporter-test
-NAME               STATUS   AGE
-transporter-test   Active   10s
+# Verify namespace created in agent-cluster (different cluster!)
+$ kubectl config use-context kind-agent-cluster
+$ kubectl get namespace test-namespace-1770722316
+NAME                        STATUS   AGE
+test-namespace-1770722316   Active   10s
 ```
 
 **Multi-phase execution observed:**
-- ✅ Event received by agent
+- ✅ Event received by agent (cross-cluster WebSocket)
 - ✅ Manifest validated
 - ✅ Resources applied to cluster
 - ✅ Verification complete
-- ✅ Status reported to CP
+- ✅ Status reported back to CP
+
+**Cross-Cluster Communication:**
+- ✅ CP in `cp-cluster` exposed via NodePort (30080)
+- ✅ Agent in `agent-cluster` connected via Docker network
+- ✅ WebSocket connection: ws://172.18.0.2:30080/ws
+- ✅ Event successfully routed and executed across clusters
 
 See [TEST-SUCCESS.md](./TEST-SUCCESS.md) for complete test report.
 
@@ -185,6 +194,211 @@ kubectl logs -n transporter-system -l app.kubernetes.io/name=transporter-cp -f
 
 # View metrics
 curl http://localhost:8080/metrics | jq
+```
+
+See [examples/README.md](./examples/README.md) for more event producer usage examples.
+
+## Multi-Cluster Setup (Production-like)
+
+For production-like testing, deploy Control Plane and Agents in separate kind clusters. This validates cross-cluster communication and simulates real-world deployments.
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ cp-cluster (Control Plane Cluster)                      │
+├─────────────────────────────────────────────────────────┤
+│ Pods:                                                   │
+│   ├── transporter-cp              [1/1 Running]        │
+│   └── transporter-cp-redis-master [1/1 Running]        │
+│                                                          │
+│ Services:                                               │
+│   ├── transporter-cp               NodePort 8080:30080 │
+│   └── transporter-cp-redis-master  ClusterIP 6379      │
+└────────────────────┬────────────────────────────────────┘
+                     │
+                     │ WebSocket: ws://172.18.0.2:30080/ws
+                     │ (Cross-cluster connection)
+                     │
+┌────────────────────▼────────────────────────────────────┐
+│ agent-cluster (Data Plane Cluster)                      │
+├─────────────────────────────────────────────────────────┤
+│ Pods:                                                   │
+│   └── transporter-agent           [1/1 Running]        │
+│                                                          │
+│ Agent Details:                                          │
+│   ├── ID: agent-cluster-agent-1                        │
+│   ├── Connects to CP external endpoint (NodePort)      │
+│   └── Executes K8s operations in this cluster          │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Setup Steps
+
+#### 1. Create Two Kind Clusters
+
+```bash
+# Create CP cluster with NodePort mappings
+cat > cp-cluster-config.yaml <<EOF
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: cp-cluster
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      - containerPort: 30080  # CP WebSocket
+        hostPort: 30080
+        protocol: TCP
+      - containerPort: 30090  # Memphis UI (optional)
+        hostPort: 30090
+        protocol: TCP
+      - containerPort: 30666  # Memphis broker (optional)
+        hostPort: 30666
+        protocol: TCP
+EOF
+
+kind create cluster --config cp-cluster-config.yaml
+
+# Create Agent cluster
+cat > agent-cluster-config.yaml <<EOF
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: agent-cluster
+nodes:
+  - role: control-plane
+EOF
+
+kind create cluster --config agent-cluster-config.yaml
+```
+
+#### 2. Deploy Control Plane to cp-cluster
+
+```bash
+# Switch to CP cluster context
+kubectl config use-context kind-cp-cluster
+
+# Build and load image (if not using registry)
+make build
+make podman-build
+kind load docker-image localhost/transporter:0.1.0 --name cp-cluster
+
+# Deploy CP with NodePort service
+helm install transporter-cp deploy/helm/transporter-cp \
+  --namespace transporter-system \
+  --create-namespace \
+  --set cp.memphis.enabled=false \
+  --set service.type=NodePort \
+  --set service.nodePort=30080
+
+# Wait for CP to be ready
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=transporter-cp \
+  -n transporter-system --timeout=120s
+
+# Get CP external IP (Docker network IP)
+CP_IP=$(docker inspect cp-cluster-control-plane \
+  --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}')
+echo "CP accessible at: ws://${CP_IP}:30080/ws"
+```
+
+#### 3. Deploy Agent to agent-cluster
+
+```bash
+# Switch to Agent cluster context
+kubectl config use-context kind-agent-cluster
+
+# Load same image into agent cluster
+kind load docker-image localhost/transporter:0.1.0 --name agent-cluster
+
+# Get CP external endpoint
+CP_IP=$(docker inspect cp-cluster-control-plane \
+  --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}')
+
+# Deploy Agent pointing to CP external endpoint
+helm install transporter-agent deploy/helm/transporter-agent \
+  --namespace transporter-system \
+  --create-namespace \
+  --set agent.id=agent-cluster-agent-1 \
+  --set agent.cluster=agent-cluster \
+  --set agent.cpURL=ws://${CP_IP}:30080/ws
+
+# Wait for agent to be ready
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=transporter-agent \
+  -n transporter-system --timeout=120s
+```
+
+#### 4. Verify Cross-Cluster Connectivity
+
+```bash
+# Check CP health (from host machine)
+curl http://localhost:30080/health
+# Expected: {"agent_count":1,"status":"healthy","version":"0.1.0"}
+
+# Check CP logs for agent connection
+kubectl config use-context kind-cp-cluster
+kubectl logs -n transporter-system -l app.kubernetes.io/name=transporter-cp | grep "Agent connected"
+# Expected: ✅ Agent connected | agent_id=agent-cluster-agent-1 | cluster=agent-cluster
+
+# Check Agent logs
+kubectl config use-context kind-agent-cluster
+kubectl logs -n transporter-system -l app.kubernetes.io/name=transporter-agent
+# Expected: ✅ Connected to Control Plane
+#           ✅ Agent registered successfully
+```
+
+#### 5. Test Event Flow Across Clusters
+
+```bash
+# Send event via HTTP to CP (from host machine)
+curl -X POST http://localhost:30080/events \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"id\": \"test-event-$(date +%s)\",
+    \"type\": \"k8s_resource\",
+    \"target_agent\": \"agent-cluster-agent-1\",
+    \"payload\": {
+      \"manifests\": [\"apiVersion: v1\\nkind: Namespace\\nmetadata:\\n  name: test-namespace-$(date +%s)\\n  labels:\\n    created-by: transporter-test\"]
+    },
+    \"created_at\": \"$(date -u +\"%Y-%m-%dT%H:%M:%SZ\")\",
+    \"ttl\": 3600000000000,
+    \"created_by\": \"manual-test\",
+    \"priority\": 0
+  }"
+
+# Verify namespace created in agent-cluster
+kubectl config use-context kind-agent-cluster
+kubectl get namespaces | grep test-namespace
+# Expected: test-namespace-XXXXX   Active   10s
+
+# View CP logs for routing
+kubectl config use-context kind-cp-cluster
+kubectl logs -n transporter-system -l app.kubernetes.io/name=transporter-cp --tail=20
+# Expected: 📨 Received event via HTTP
+#           📤 Event routed to agent
+#           📊 Status updates (received → validating → applying → completed)
+
+# View Agent logs for execution
+kubectl config use-context kind-agent-cluster
+kubectl logs -n transporter-system -l app.kubernetes.io/name=transporter-agent --tail=20
+# Expected: 📥 Received event
+#           ✅ Event completed successfully
+```
+
+### Key Points
+
+1. **NodePort Exposure**: CP service exposed via NodePort (30080) for external access
+2. **Docker Network**: Both clusters share Docker network, CP accessible via container IP
+3. **Cross-Cluster WebSocket**: Agent connects from agent-cluster to CP in cp-cluster
+4. **Production Pattern**: This setup mimics production where CP and agents are in different networks/clusters
+
+### Cleanup
+
+```bash
+# Delete both clusters
+kind delete cluster --name cp-cluster
+kind delete cluster --name agent-cluster
+
+# Or delete specific cluster
+kind delete cluster --name agent-cluster
 ```
 
 See [examples/README.md](./examples/README.md) for more event producer usage examples.
@@ -366,4 +580,4 @@ MIT License - see [LICENSE](./LICENSE) for details
 
 **Built with ❤️ for Platform Engineers and DevOps teams**
 
-**Status**: MVP Complete and Tested | **Version**: 0.1.0 | **Last Updated**: 2026-02-08
+**Status**: MVP Complete - Multi-Cluster Tested | **Version**: 0.1.0 | **Last Updated**: 2026-02-10

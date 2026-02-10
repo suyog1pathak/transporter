@@ -32,9 +32,15 @@ spec:
           - "--memphis-enabled=true"
           - "--memphis-host={{ .Values.cp.memphis.host }}"
           - "--memphis-username={{ .Values.cp.memphis.username }}"
+          {{- if .Values.cp.memphis.connectionToken }}
+          - "--memphis-connection-token={{ .Values.cp.memphis.connectionToken }}"
+          {{- else }}
           - "--memphis-password={{ .Values.cp.memphis.password }}"
+          {{- end }}
           - "--memphis-station={{ .Values.cp.memphis.station }}"
+          {{- if gt (.Values.cp.memphis.accountID | int) 0 }}
           - "--memphis-account-id={{ .Values.cp.memphis.accountID }}"
+          {{- end }}
           {{- else }}
           - "--memphis-enabled=false"
           {{- end }}

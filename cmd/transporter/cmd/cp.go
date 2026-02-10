@@ -34,12 +34,13 @@ var cpConfig struct {
 	wsPort int
 
 	// Memphis Config
-	memphisEnabled  bool
-	memphisHost     string
-	memphisUsername string
-	memphisPassword string
-	memphisStation  string
-	memphisAccountID int
+	memphisEnabled       bool
+	memphisHost          string
+	memphisUsername      string
+	memphisPassword      string
+	memphisConnectionToken string
+	memphisStation       string
+	memphisAccountID     int
 
 	// Redis Config
 	redisAddr     string
@@ -62,9 +63,10 @@ func init() {
 	cpCmd.Flags().BoolVar(&cpConfig.memphisEnabled, "memphis-enabled", true, "Enable Memphis queue integration")
 	cpCmd.Flags().StringVar(&cpConfig.memphisHost, "memphis-host", "localhost", "Memphis server hostname")
 	cpCmd.Flags().StringVar(&cpConfig.memphisUsername, "memphis-username", "root", "Memphis username")
-	cpCmd.Flags().StringVar(&cpConfig.memphisPassword, "memphis-password", "memphis", "Memphis password")
+	cpCmd.Flags().StringVar(&cpConfig.memphisPassword, "memphis-password", "memphis", "Memphis password (alternative to connection token)")
+	cpCmd.Flags().StringVar(&cpConfig.memphisConnectionToken, "memphis-connection-token", "", "Memphis connection token (preferred over password)")
 	cpCmd.Flags().StringVar(&cpConfig.memphisStation, "memphis-station", "transporter-events", "Memphis station name")
-	cpCmd.Flags().IntVar(&cpConfig.memphisAccountID, "memphis-account-id", 1, "Memphis account ID")
+	cpCmd.Flags().IntVar(&cpConfig.memphisAccountID, "memphis-account-id", 0, "Memphis account ID (optional)")
 
 	// Redis flags
 	cpCmd.Flags().StringVar(&cpConfig.redisAddr, "redis-addr", "localhost:6379", "Redis server address")
@@ -103,11 +105,12 @@ func runCP(cmd *cobra.Command, args []string) error {
 		logger.Info("📬 Connecting to Memphis", "host", cpConfig.memphisHost)
 		var err error
 		memphisQueue, err = queue.NewMemphisQueue(queue.Config{
-			Host:        cpConfig.memphisHost,
-			Username:    cpConfig.memphisUsername,
-			Password:    cpConfig.memphisPassword,
-			StationName: cpConfig.memphisStation,
-			AccountID:   cpConfig.memphisAccountID,
+			Host:            cpConfig.memphisHost,
+			Username:        cpConfig.memphisUsername,
+			Password:        cpConfig.memphisPassword,
+			ConnectionToken: cpConfig.memphisConnectionToken,
+			StationName:     cpConfig.memphisStation,
+			AccountID:       cpConfig.memphisAccountID,
 		})
 		if err != nil {
 			return fmt.Errorf("failed to connect to Memphis: %w", err)
