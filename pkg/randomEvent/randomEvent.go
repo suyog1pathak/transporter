@@ -25,14 +25,30 @@ func GenerateRandomEvent(agentName string) ([]byte, error) {
 		return nil, err
 	}
 
+	// Create a simple namespace manifest as payload
+	namespace := "test-" + eventName
+	manifest := `apiVersion: v1
+kind: Namespace
+metadata:
+  name: ` + namespace + `
+  labels:
+    created-by: transporter-random-event`
+
 	event := model.Event{
-		AgentName: agentName,
-		Name:      eventName,
-		Metadata: map[string]string{
-			"managed_by": "transporter",
+		ID:          uuid.New().String(),
+		Type:        model.EventTypeK8sResource,
+		TargetAgent: agentName,
+		Payload: model.EventPayload{
+			Manifests: []string{manifest},
 		},
-		TimeStamp: time.Now(),
-		UUID:      uuid.New(),
+		CreatedAt: time.Now(),
+		CreatedBy: "random-event-generator",
+		TTL:       24 * time.Hour,
+		Priority:  0,
+		Labels: map[string]string{
+			"managed_by": "transporter",
+			"event_name": eventName,
+		},
 	}
 
 	jsonEvent, err := json.Marshal(event)

@@ -20,20 +20,37 @@ type MemphisQueue struct {
 
 // Config holds Memphis configuration
 type Config struct {
-	Host       string
-	Username   string
-	Password   string
-	StationName string
-	AccountID  int
+	Host            string
+	Username        string
+	Password        string
+	ConnectionToken string // Connection token for token-based auth
+	StationName     string
+	AccountID       int
 }
 
 // NewMemphisQueue creates a new Memphis queue client
 func NewMemphisQueue(config Config) (*MemphisQueue, error) {
+	// Build connection options
+	var connectOpts []memphis.Option
+
+	// Prefer ConnectionToken if provided, otherwise use Password
+	if config.ConnectionToken != "" {
+		connectOpts = append(connectOpts, memphis.ConnectionToken(config.ConnectionToken))
+	} else if config.Password != "" {
+		connectOpts = append(connectOpts, memphis.Password(config.Password))
+	}
+
+	// Note: AccountID option may not be available in SDK v1.0.1
+	// Uncomment when upgrading to newer SDK version:
+	// if config.AccountID > 0 {
+	//     connectOpts = append(connectOpts, memphis.AccountId(config.AccountID))
+	// }
+
 	// Connect to Memphis
 	conn, err := memphis.Connect(
 		config.Host,
 		config.Username,
-		memphis.Password(config.Password),
+		connectOpts...,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to Memphis: %w", err)

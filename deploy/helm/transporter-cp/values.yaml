@@ -33,9 +33,10 @@ cp:
   memphis:
     host: "memphis"  # Just hostname, Memphis client adds port
     username: "root"
-    password: "memphis"
+    password: "memphis"  # Used if connectionToken is not provided
+    connectionToken: ""  # Preferred over password for token-based auth
     station: "transporter-events"
-    accountID: 1
+    accountID: 0  # Optional, for cloud deployments
     enabled: false  # Disable Memphis for now
 
   # Redis configuration

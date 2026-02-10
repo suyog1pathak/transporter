@@ -15,5 +15,8 @@ spec:
       targetPort: websocket
       protocol: TCP
       name: websocket
+      {{- if and (eq .Values.service.type "NodePort") .Values.service.nodePort }}
+      nodePort: {{ .Values.service.nodePort }}
+      {{- end }}
   selector:
     {{- include "transporter-cp.selectorLabels" . | nindent 4 }}
