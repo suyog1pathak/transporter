@@ -29,34 +29,34 @@ Transporter is a lightweight, event-driven system that enables platform teams to
             ┌────────────┼────────────┐
             │            │            │
          HTTP API    Memphis      (Other)
-            │         Queue          │
+            │         Queue           │
             │            │            │
             └────────────┼────────────┘
                          │
                          ▼
         ┌────────────────────────────────────────┐
         │   Control Plane Cluster                │
-        │                                         │
-        │  ┌──────────────┐    ┌──────────────┐ │
-        │  │ Memphis*     │    │   Redis      │ │
-        │  │ (Optional)   │    │   (State)    │ │
-        │  └──────┬───────┘    └──────▲───────┘ │
+        │                                        │
+        │  ┌──────────────┐    ┌──────────────┐  │
+        │  │ Memphis*     │    │   Redis      │  │
+        │  │ (Optional)   │    │   (State)    │  │
+        │  └──────┬───────┘    └──────▲───────┘  │
         │         │                   │          │
-        │  ┌──────▼───────────────────┴───────┐ │
-        │  │     Control Plane (CP)           │ │
-        │  │  - Event Router                  │ │
-        │  │  - Agent Registry                │ │
-        │  │  - WebSocket Server (0.0.0.0)    │ │
-        │  │  - HTTP /events endpoint         │ │
-        │  └──────────────┬───────────────────┘ │
+        │  ┌──────▼───────────────────┴───────┐  │
+        │  │     Control Plane (CP)           │  │
+        │  │  - Event Router                  │  │
+        │  │  - Agent Registry                │  │
+        │  │  - WebSocket Server (0.0.0.0)    │  │
+        │  │  - HTTP /events endpoint         │  │
+        │  └──────────────┬───────────────────┘  │
         └─────────────────┼──────────────────────┘
                           │
                           │ Outbound WebSocket Connections
                           │ (Agents initiate connections)
                           │
-         ┌────────────────┼────────────────┐
-         │                │                │
-         │                │                │
+         ┌────────────────┼──────────────┐
+         │                │              │
+         │                │              │
     ┌────▼─────────┐ ┌────▼─────────┐ ┌──▼───────────┐
     │   Cluster 1  │ │   Cluster 2  │ │  Cluster N   │
     │              │ │              │ │              │
@@ -66,7 +66,7 @@ Transporter is a lightweight, event-driven system that enables platform teams to
     │ └────┬─────┘ │ │ └────┬─────┘ │ │ └────┬─────┘ │
     │      │       │ │      │       │ │      │       │
     │      ▼       │ │      ▼       │ │      ▼       │
-    │  K8s API    │ │  K8s API    │ │  K8s API    │
+    │   K8s API    │ │  K8s API     │ │  K8s API     │
     └──────────────┘ └──────────────┘ └──────────────┘
 ```
 
