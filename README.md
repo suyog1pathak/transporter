@@ -478,7 +478,6 @@ Publishes events to Memphis queue for reliable distribution.
 - **[TEST-SUCCESS.md](./TEST-SUCCESS.md)** - Complete test report with results
 - **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Full deployment guide for kind cluster
 - **[examples/README.md](./examples/README.md)** - Event producer usage and examples
-- **[CONTEXT.md](./CONTEXT.md)** - Development history, decisions, and current state
 
 ## Development
 
@@ -580,8 +579,6 @@ kubectl get namespace transporter-test
 - High availability for Control Plane
 - Security audit
 - Multi-tenancy support
-
-See [CONTEXT.md](./CONTEXT.md) for detailed roadmap and decisions.
 
 ## Contributing
 
