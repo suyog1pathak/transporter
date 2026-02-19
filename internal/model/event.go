@@ -18,19 +18,19 @@ const (
 // Event represents a task to be executed by a data plane agent
 type Event struct {
 	// Core Identity
-	ID          string    `json:"id"`                    // Unique event ID (UUID)
-	Type        EventType `json:"type"`                  // Type of event (k8s_resource, script, policy)
-	TargetAgent string    `json:"target_agent"`          // Explicit agent ID to execute this event
+	ID          string    `json:"id"`           // Unique event ID (UUID)
+	Type        EventType `json:"type"`         // Type of event (k8s_resource, script, policy)
+	TargetAgent string    `json:"target_agent"` // Explicit agent ID to execute this event
 
 	// Payload
 	Payload EventPayload `json:"payload"`
 
 	// Metadata
 	CreatedAt time.Time         `json:"created_at"`
-	CreatedBy string            `json:"created_by"`        // User/system that created the event
-	TTL       time.Duration     `json:"ttl"`               // Time-to-live for event expiration
-	Priority  int               `json:"priority"`          // Priority for future use (higher = more urgent)
-	Labels    map[string]string `json:"labels,omitempty"`  // Optional labels for filtering/grouping
+	CreatedBy string            `json:"created_by"`          // User/system that created the event
+	TTL       time.Duration     `json:"ttl"`                 // Time-to-live for event expiration
+	Priority  int               `json:"priority"`            // Priority for future use (higher = more urgent)
+	Labels    map[string]string `json:"labels,omitempty"`    // Optional labels for filtering/grouping
 }
 
 // EventPayload contains the actual data/instructions for the event
@@ -110,13 +110,13 @@ func (e *Event) Validate() error {
 
 // Custom errors for event validation
 var (
-	ErrMissingEventID      = &EventError{Code: "MISSING_EVENT_ID", Message: "event ID is required"}
-	ErrMissingTargetAgent  = &EventError{Code: "MISSING_TARGET_AGENT", Message: "target agent is required"}
-	ErrMissingEventType    = &EventError{Code: "MISSING_EVENT_TYPE", Message: "event type is required"}
-	ErrEmptyManifests      = &EventError{Code: "EMPTY_MANIFESTS", Message: "k8s_resource event must have at least one manifest"}
-	ErrEmptyScript         = &EventError{Code: "EMPTY_SCRIPT", Message: "script event must have script content"}
-	ErrEmptyPolicyRules    = &EventError{Code: "EMPTY_POLICY_RULES", Message: "policy event must have at least one rule"}
-	ErrUnknownEventType    = &EventError{Code: "UNKNOWN_EVENT_TYPE", Message: "unknown event type"}
+	ErrMissingEventID     = &EventError{Code: "MISSING_EVENT_ID", Message: "event ID is required"}
+	ErrMissingTargetAgent = &EventError{Code: "MISSING_TARGET_AGENT", Message: "target agent is required"}
+	ErrMissingEventType   = &EventError{Code: "MISSING_EVENT_TYPE", Message: "event type is required"}
+	ErrEmptyManifests     = &EventError{Code: "EMPTY_MANIFESTS", Message: "k8s_resource event must have at least one manifest"}
+	ErrEmptyScript        = &EventError{Code: "EMPTY_SCRIPT", Message: "script event must have script content"}
+	ErrEmptyPolicyRules   = &EventError{Code: "EMPTY_POLICY_RULES", Message: "policy event must have at least one rule"}
+	ErrUnknownEventType   = &EventError{Code: "UNKNOWN_EVENT_TYPE", Message: "unknown event type"}
 )
 
 // EventError represents an event-related error

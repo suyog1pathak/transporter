@@ -21,7 +21,7 @@ const (
 type ExecutionPhase string
 
 const (
-	PhaseReceived  ExecutionPhase = "received"   // Agent received the event
+	PhaseReceived   ExecutionPhase = "received"   // Agent received the event
 	PhaseValidating ExecutionPhase = "validating" // Validating manifests/scripts
 	PhaseApplying   ExecutionPhase = "applying"   // Applying changes to cluster
 	PhaseVerifying  ExecutionPhase = "verifying"  // Verifying the changes
@@ -34,8 +34,8 @@ type EventStatus struct {
 	EventID      string         `json:"event_id"`
 	AgentID      string         `json:"agent_id"`
 	State        ExecutionState `json:"state"`
-	Phase        ExecutionPhase `json:"phase,omitempty"`        // Current execution phase
-	Message      string         `json:"message,omitempty"`      // Human-readable status message
+	Phase        ExecutionPhase `json:"phase,omitempty"`         // Current execution phase
+	Message      string         `json:"message,omitempty"`       // Human-readable status message
 	UpdatedAt    time.Time      `json:"updated_at"`
 	ExecutionLog []LogEntry     `json:"execution_log,omitempty"` // Detailed execution log
 	Result       *EventResult   `json:"result,omitempty"`        // Final result (populated when completed/failed)
@@ -43,10 +43,10 @@ type EventStatus struct {
 
 // LogEntry represents a single log entry during event execution
 type LogEntry struct {
-	Timestamp time.Time      `json:"timestamp"`
-	Phase     ExecutionPhase `json:"phase"`
-	Level     LogLevel       `json:"level"`    // info, warning, error
-	Message   string         `json:"message"`
+	Timestamp time.Time              `json:"timestamp"`
+	Phase     ExecutionPhase         `json:"phase"`
+	Level     LogLevel               `json:"level"` // info, warning, error
+	Message   string                 `json:"message"`
 	Details   map[string]interface{} `json:"details,omitempty"` // Additional structured data
 }
 
@@ -172,7 +172,7 @@ type StatusUpdate struct {
 
 // Custom errors for status operations
 var (
-	ErrStatusNotFound    = &StatusError{Code: "STATUS_NOT_FOUND", Message: "event status not found"}
+	ErrStatusNotFound         = &StatusError{Code: "STATUS_NOT_FOUND", Message: "event status not found"}
 	ErrInvalidStateTransition = &StatusError{Code: "INVALID_STATE_TRANSITION", Message: "invalid state transition"}
 )
 

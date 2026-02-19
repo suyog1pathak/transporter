@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/suyog1pathak/transporter/model"
+	"github.com/suyog1pathak/transporter/internal/model"
 )
 
 // RedisStorage implements persistent storage using Redis

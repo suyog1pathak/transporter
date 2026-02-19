@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/lucasepe/codename"
-	"github.com/suyog1pathak/transporter/model"
+	"github.com/suyog1pathak/transporter/internal/model"
 )
 
 func generateName() (string, error) {

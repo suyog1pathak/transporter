@@ -3,6 +3,16 @@
 **Date**: 2026-02-10 (Updated)
 **Status**: ✅ MVP COMPLETE - Memphis Integration & Multi-Cluster Tested
 
+## Screenshots
+
+### Memphis UI - Event Successfully Consumed
+
+![Memphis station showing transporter-events with 1 message consumed by transporter-cp-consumer](memphis-success.png)
+
+Memphis station `transporter-events` showing the event consumed by `transporter-cp-consumer` (active, 0 unacked, 0 unprocessed).
+
+---
+
 ## Test Summary
 
 Successfully tested complete event-driven multi-cluster Kubernetes management flow with both HTTP and Memphis queue modes. Verified end-to-end event flow across separate clusters with connection token authentication.

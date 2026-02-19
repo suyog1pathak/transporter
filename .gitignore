@@ -23,6 +23,10 @@ go.work
 # Binaries
 bin/
 
+# Helm chart dependencies
+**/charts/*.tgz
+**/Chart.lock
+
 # Development/session files
 .claude/
 CONTEXT.md

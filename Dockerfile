@@ -18,7 +18,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     go build -a -installsuffix cgo \
     -ldflags="-w -s -X main.version=0.1.0 -X main.buildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    -o transporter cmd/transporter/main.go
+    -o transporter ./cmd/transporter/
 
 # Verify binary exists
 RUN ls -lh /build/transporter
