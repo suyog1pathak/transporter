@@ -16,8 +16,7 @@ func InitLogger(debug bool) {
 	if debug {
 		opts.Level = slog.LevelDebug
 	}
-
-	handler := slog.NewTextHandler(os.Stdout, opts)
+	handler := slog.NewJSONHandler(os.Stdout, opts)
 	Log = slog.New(handler)
 	slog.SetDefault(Log)
 }
