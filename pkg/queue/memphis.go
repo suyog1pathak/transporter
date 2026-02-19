@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/memphisdev/memphis.go"
-	"github.com/suyog1pathak/transporter/model"
+	"github.com/suyog1pathak/transporter/internal/model"
 )
 
 // MemphisQueue wraps Memphis client for event queuing

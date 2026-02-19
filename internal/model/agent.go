@@ -20,26 +20,26 @@ type Agent struct {
 	Name string `json:"name"` // Human-friendly name
 
 	// Cluster Information
-	ClusterName     string `json:"cluster_name"`               // Name of the K8s cluster
-	ClusterProvider string `json:"cluster_provider"`           // eks, gke, aks, etc.
-	Region          string `json:"region"`                     // Cloud region
-	Version         string `json:"version"`                    // Agent version
+	ClusterName     string            `json:"cluster_name"`     // Name of the K8s cluster
+	ClusterProvider string            `json:"cluster_provider"` // eks, gke, aks, etc.
+	Region          string            `json:"region"`           // Cloud region
+	Version         string            `json:"version"`          // Agent version
 	Labels          map[string]string `json:"labels,omitempty"` // Custom labels for filtering
 
 	// Connection State
-	ConnectionID  string      `json:"connection_id"`  // WebSocket connection ID
-	Status        AgentStatus `json:"status"`         // Current agent status
-	LastHeartbeat time.Time   `json:"last_heartbeat"` // Last heartbeat timestamp
-	ConnectedAt   time.Time   `json:"connected_at"`   // When agent connected
-	DisconnectedAt *time.Time `json:"disconnected_at,omitempty"` // When agent disconnected (nil if connected)
+	ConnectionID   string      `json:"connection_id"`             // WebSocket connection ID
+	Status         AgentStatus `json:"status"`                    // Current agent status
+	LastHeartbeat  time.Time   `json:"last_heartbeat"`            // Last heartbeat timestamp
+	ConnectedAt    time.Time   `json:"connected_at"`              // When agent connected
+	DisconnectedAt *time.Time  `json:"disconnected_at,omitempty"` // When agent disconnected (nil if connected)
 
 	// Capabilities
 	Capabilities []string `json:"capabilities"` // Supported operations (k8s_crud, script_exec, policy)
 
 	// Metadata
-	Hostname    string            `json:"hostname,omitempty"`     // Agent pod hostname
-	Namespace   string            `json:"namespace,omitempty"`    // K8s namespace where agent runs
-	Metadata    map[string]string `json:"metadata,omitempty"`     // Additional metadata
+	Hostname  string            `json:"hostname,omitempty"`  // Agent pod hostname
+	Namespace string            `json:"namespace,omitempty"` // K8s namespace where agent runs
+	Metadata  map[string]string `json:"metadata,omitempty"`  // Additional metadata
 }
 
 // AgentRegistration is sent by an agent when it first connects to the control plane
@@ -147,13 +147,13 @@ type Heartbeat struct {
 
 // Custom errors for agent validation
 var (
-	ErrMissingAgentID       = &AgentError{Code: "MISSING_AGENT_ID", Message: "agent ID is required"}
-	ErrMissingAgentName     = &AgentError{Code: "MISSING_AGENT_NAME", Message: "agent name is required"}
-	ErrMissingClusterName   = &AgentError{Code: "MISSING_CLUSTER_NAME", Message: "cluster name is required"}
-	ErrMissingAgentVersion  = &AgentError{Code: "MISSING_AGENT_VERSION", Message: "agent version is required"}
-	ErrMissingCapabilities  = &AgentError{Code: "MISSING_CAPABILITIES", Message: "at least one capability is required"}
-	ErrAgentNotFound        = &AgentError{Code: "AGENT_NOT_FOUND", Message: "agent not found"}
-	ErrAgentAlreadyExists   = &AgentError{Code: "AGENT_ALREADY_EXISTS", Message: "agent already exists"}
+	ErrMissingAgentID      = &AgentError{Code: "MISSING_AGENT_ID", Message: "agent ID is required"}
+	ErrMissingAgentName    = &AgentError{Code: "MISSING_AGENT_NAME", Message: "agent name is required"}
+	ErrMissingClusterName  = &AgentError{Code: "MISSING_CLUSTER_NAME", Message: "cluster name is required"}
+	ErrMissingAgentVersion = &AgentError{Code: "MISSING_AGENT_VERSION", Message: "agent version is required"}
+	ErrMissingCapabilities = &AgentError{Code: "MISSING_CAPABILITIES", Message: "at least one capability is required"}
+	ErrAgentNotFound       = &AgentError{Code: "AGENT_NOT_FOUND", Message: "agent not found"}
+	ErrAgentAlreadyExists  = &AgentError{Code: "AGENT_ALREADY_EXISTS", Message: "agent already exists"}
 )
 
 // AgentError represents an agent-related error

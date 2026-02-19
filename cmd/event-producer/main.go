@@ -12,7 +12,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
-	"github.com/suyog1pathak/transporter/model"
+	"github.com/suyog1pathak/transporter/internal/model"
 	"github.com/suyog1pathak/transporter/pkg/queue"
 	"gopkg.in/yaml.v3"
 )
@@ -61,7 +61,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cpURL, "cp-url", "http://localhost:8080", "Control Plane URL (for http mode)")
 
 	// Memphis flags (for memphis mode)
-	rootCmd.PersistentFlags().StringVar(&memphisHost, "memphis-host", "localhost:6666", "Memphis server host:port")
+	rootCmd.PersistentFlags().StringVar(&memphisHost, "memphis-host", "localhost", "Memphis server hostname (SDK appends port 6666 automatically)")
 	rootCmd.PersistentFlags().StringVar(&memphisUsername, "memphis-username", "root", "Memphis username")
 	rootCmd.PersistentFlags().StringVar(&memphisPassword, "memphis-password", "memphis", "Memphis password (alternative to connection token)")
 	rootCmd.PersistentFlags().StringVar(&memphisConnectionToken, "memphis-connection-token", "", "Memphis connection token (preferred over password)")

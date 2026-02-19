@@ -9,7 +9,7 @@ import (
 	"github.com/gookit/slog"
 
 	"github.com/memphisdev/memphis.go"
-	"github.com/suyog1pathak/transporter/model"
+	"github.com/suyog1pathak/transporter/internal/model"
 )
 
 var wg sync.WaitGroup

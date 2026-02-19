@@ -25,7 +25,7 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["/app/transporter"]
         args:
-          - "cp"
+          - "control-plane"
           - "--ws-addr={{ .Values.cp.wsAddr }}"
           - "--ws-port={{ .Values.cp.wsPort }}"
           {{- if .Values.cp.memphis.enabled }}

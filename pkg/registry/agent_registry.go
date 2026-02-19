@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/suyog1pathak/transporter/model"
+	"github.com/suyog1pathak/transporter/internal/model"
 	"github.com/gorilla/websocket"
 )
 
